@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Staff-IT Rate Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     BRAND TOKENS — pulled from staffit.be. Edit here to re-skin.
+     ============================================================ */
+  :root {
+    --brand: #1900ff;          /* Staff-IT primary */
+    --brand-dark: #1400cc;     /* hover */
+    --brand-soft: #ecebff;     /* tints */
+    --brand-softer: #f5f5ff;
+    --ink: #0b0b16;            /* primary text */
+    --muted: #6b7280;          /* secondary text */
+    --line: #e6e7ee;           /* borders */
+    --bg: #ffffff;
+    --bg-alt: #f6f7fb;         /* section background */
+    --agency: #e11d48;         /* "other agency" accent (worse) */
+    --agency-soft: #fff1f3;
+    --save: #0f9d58;           /* savings green */
+    --radius: 14px;
+    --radius-sm: 10px;
+    --shadow: 0 1px 2px rgba(11,11,22,.04), 0 8px 28px rgba(11,11,22,.06);
+    --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sit-wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 28px 20px 64px;
+  }
+
+  /* ---------- Header ---------- */
+  .sit-head {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 6px;
+  }
+  .sit-logo { height: 30px; width: auto; display: block; }
+  .sit-logo-fallback {
+    font-weight: 800; font-size: 22px; letter-spacing: -.02em; color: var(--ink);
+  }
+  .sit-logo-fallback span { color: var(--brand); }
+  .sit-title { font-size: 28px; font-weight: 800; letter-spacing: -.02em; margin: 18px 0 4px; }
+  .sit-sub { color: var(--muted); margin: 0 0 26px; font-size: 15px; }
+
+  /* ---------- Stepper indicator ---------- */
+  .sit-steps { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+  .sit-step {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    padding: 7px 14px; border-radius: 999px; background: var(--bg-alt);
+    border: 1px solid var(--line);
+  }
+  .sit-step .num {
+    width: 20px; height: 20px; border-radius: 50%; background: #fff;
+    border: 1px solid var(--line); display: grid; place-items: center; font-size: 12px;
+  }
+  .sit-step.active { color: var(--brand); background: var(--brand-soft); border-color: transparent; }
+  .sit-step.active .num { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .sit-step.done { color: var(--brand); }
+  .sit-step.done .num { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+  /* ---------- Panels ---------- */
+  .sit-panel { display: none; }
+  .sit-panel.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .sit-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 12px; }
+  .sit-block { margin-bottom: 30px; }
+
+  /* ---------- Chips ---------- */
+  .sit-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip {
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all .15s ease; font-family: inherit;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--brand); color: var(--brand); }
+  .chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .chip.domain.on { background: var(--brand); }
+
+  /* ---------- Role cards ---------- */
+  .role-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; }
+  .role {
+    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px;
+    transition: border-color .15s ease, box-shadow .15s ease; background: #fff;
+  }
+  .role:hover { border-color: var(--brand); }
+  .role-name { font-weight: 600; font-size: 12.5px; line-height: 1.25; }
+  .role-sens { display: flex; gap: 4px; margin-top: 7px; }
+  .sen {
+    flex: 1; text-align: center; border: 1px solid var(--line); background: #fff;
+    border-radius: 6px; padding: 3px 2px; font-size: 10.5px; font-weight: 600; cursor: pointer;
+    transition: all .12s ease; font-family: inherit; color: var(--ink);
+  }
+  .sen:hover { border-color: var(--brand); color: var(--brand); }
+  .sen.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .role.has-sel { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+
+  .empty { color: var(--muted); font-size: 14px; padding: 18px 0; }
+
+  /* ---------- Selection summary ---------- */
+  .selbar {
+    margin-top: 26px; padding: 16px 18px; background: var(--brand-softer);
+    border: 1px solid var(--brand-soft); border-radius: var(--radius);
+  }
+  .selbar .t { font-size: 13px; font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px; }
+  .selpills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .selpill {
+    display: inline-flex; align-items: center; gap: 8px; background: #fff;
+    border: 1px solid var(--brand-soft); border-radius: 999px; padding: 6px 8px 6px 14px;
+    font-size: 13px; font-weight: 500;
+  }
+  .selpill b { font-weight: 700; }
+  .selpill .x {
+    cursor: pointer; width: 18px; height: 18px; border-radius: 50%; background: var(--brand-soft);
+    color: var(--brand); display: grid; place-items: center; font-size: 13px; line-height: 1; border: none;
+  }
+  .selpill .x:hover { background: var(--brand); color: #fff; }
+
+  /* ---------- Rows (step 2) ---------- */
+  .rows { display: flex; flex-direction: column; gap: 12px; }
+  .row {
+    display: grid; grid-template-columns: 1fr auto auto auto; gap: 18px; align-items: center;
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; background: #fff;
+  }
+  .row .profile .nm { font-weight: 600; }
+  .row .profile .dm { font-size: 12px; color: var(--muted); }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    border: none; background: #fff; padding: 7px 13px; font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; color: var(--ink); transition: all .12s;
+  }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button.on { background: var(--brand); color: #fff; }
+  .field-cap { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; display: block; }
+  .qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; }
+  .qty button { width: 32px; height: 32px; border: none; background: #fff; font-size: 17px; cursor: pointer; color: var(--brand); font-family: inherit; }
+  .qty button:disabled { color: var(--line); cursor: not-allowed; }
+  .qty .v { width: 34px; text-align: center; font-weight: 700; font-size: 14px; }
+  .row .del { border: none; background: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 6px; border-radius: 8px; }
+  .row .del:hover { color: var(--agency); background: var(--agency-soft); }
+
+  /* ---------- Results table ---------- */
+  .tablewrap { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  table.res { width: 100%; border-collapse: collapse; }
+  table.res th, table.res td { padding: 14px 16px; text-align: right; }
+  table.res th:first-child, table.res td:first-child { text-align: left; }
+  table.res thead th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--bg-alt); font-weight: 700; border-bottom: 1px solid var(--line); }
+  table.res thead th.staff { color: var(--brand); }
+  table.res thead th.agency { color: var(--agency); }
+  table.res th .pct { display: block; font-size: 11px; font-weight: 600; opacity: .85; }
+  table.res tbody td { border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  table.res tbody tr:last-child td { border-bottom: none; }
+  .amt { font-weight: 700; font-size: 15px; }
+  .amt.staff { color: var(--brand); }
+  .amt.agency { color: var(--agency); }
+  .perday { display: block; font-size: 11px; color: var(--muted); font-weight: 500; }
+  .pname { font-weight: 600; }
+  .pmeta { font-size: 12px; color: var(--muted); }
+  table.res tfoot td { padding: 14px 16px; font-weight: 700; background: var(--bg-alt); border-top: 2px solid var(--line); font-variant-numeric: tabular-nums; }
+  table.res tfoot .amt.staff { color: var(--brand); }
+  table.res tfoot .amt.agency { color: var(--agency); }
+
+  /* ---------- Savings hero ---------- */
+  .save-hero {
+    margin-top: 26px; text-align: center; padding: 36px 24px;
+    background: linear-gradient(135deg, var(--brand) 0%, #4b2bff 100%);
+    border-radius: var(--radius); color: #fff;
+  }
+  .save-hero .lead { font-size: 15px; font-weight: 600; opacity: .92; letter-spacing: .01em; }
+  .save-hero .big { font-size: 52px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0 2px; line-height: 1.05; }
+  .save-hero .note { font-size: 12px; opacity: .8; margin-top: 4px; }
+  .save-hero .cta {
+    display: inline-block; margin-top: 22px; background: #fff; color: var(--brand);
+    font-weight: 700; font-size: 15px; padding: 13px 26px; border-radius: 999px; text-decoration: none;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .save-hero .cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+
+  .footnote { text-align: center; color: var(--muted); font-size: 12px; margin-top: 16px; }
+
+  /* ---------- Buttons ---------- */
+  .actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; }
+  .btn {
+    font-family: inherit; font-weight: 700; font-size: 15px; padding: 13px 28px; border-radius: 999px;
+    cursor: pointer; border: 1px solid var(--brand); transition: all .15s ease;
+  }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
+  .btn-primary:disabled { background: var(--line); border-color: var(--line); color: #fff; cursor: not-allowed; }
+  .btn-ghost { background: #fff; color: var(--brand); }
+  .btn-ghost:hover { background: var(--brand-soft); }
+
+  @media (max-width: 640px) {
+    .row { grid-template-columns: 1fr; gap: 14px; }
+    .save-hero .big { font-size: 40px; }
+    table.res th, table.res td { padding: 11px 10px; }
+    .amt { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="sit-wrap">
+
+  <!-- Header -->
+  <div class="sit-head">
+    <img class="sit-logo" src="https://staffit.be/_assets/v11/849a01e6048f0a8415231d053fce56122a061374.svg"
+         alt="Staff-IT" onerror="this.style.display='none';document.getElementById('logoFb').style.display='block';" />
+    <div id="logoFb" class="sit-logo-fallback" style="display:none;">Staff<span>-IT</span></div>
+  </div>
+  <h1 class="sit-title">Rate Calculator</h1>
+  <p class="sit-sub">Build your team, pick a duration, and see exactly how much you save with Staff-IT versus a traditional agency.</p>
+
+  <!-- Steps -->
+  <div class="sit-steps">
+    <div class="sit-step active" id="ind1"><span class="num">1</span> Select profiles</div>
+    <div class="sit-step" id="ind2"><span class="num">2</span> Set duration &amp; quantity</div>
+    <div class="sit-step" id="ind3"><span class="num">3</span> Your savings</div>
+  </div>
+
+  <!-- STEP 1: SELECT -->
+  <div class="sit-panel active" id="panel1">
+    <div class="sit-block">
+      <p class="sit-label">1 · Filter by domain</p>
+      <div class="sit-chips" id="domainChips"></div>
+    </div>
+    <div class="sit-block">
+      <p class="sit-label">2 · Pick roles &amp; seniority</p>
+      <div class="role-grid" id="roleGrid"></div>
+    </div>
+
+    <div class="selbar" id="selbar" style="display:none;">
+      <div class="t">Your selection</div>
+      <div class="selpills" id="selpills"></div>
+    </div>
+
+    <div class="actions">
+      <span></span>
+      <button class="btn btn-primary" id="toStep2" disabled>Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: CONFIGURE -->
+  <div class="sit-panel" id="panel2">
+    <p class="sit-label">For each profile, set how long you want to hire and how many you need</p>
+    <div class="rows" id="rows"></div>
+    <div class="actions">
+      <button class="btn btn-ghost" id="backTo1">&larr; Back</button>
+      <button class="btn btn-primary" id="toStep3">Show me how much I will save &rarr;</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: RESULTS -->
+  <div class="sit-panel" id="panel3">
+    <div class="tablewrap">
+      <table class="res">
+        <thead>
+          <tr>
+            <th>Profile</th>
+            <th>Freelancer rate</th>
+            <th class="staff">Staff-IT <span class="pct">with 8%</span></th>
+            <th class="agency">Other Agency <span class="pct">20%</span></th>
+          </tr>
+        </thead>
+        <tbody id="resBody"></tbody>
+        <tfoot id="resFoot"></tfoot>
+      </table>
+    </div>
+
+    <div class="save-hero">
+      <div class="lead">Working with Staff-IT saves you</div>
+      <div class="big" id="saveBig">€0</div>
+      <div class="note" id="saveNote"></div>
+      <a class="cta" id="quoteCta" href="#">Want a personalized quote? Click here &rarr;</a>
+    </div>
+    <p class="footnote">All amounts are excl. VAT and based on 20 working days per month. Rates are indicative market medians.</p>
+
+    <div class="actions">
+      <button class="btn btn-ghost" id="backTo2">&larr; Adjust selection</button>
+      <span></span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   1. RATE ENGINE — deterministic port of RateNavigator.tsx
+   ============================================================ */
+const CATEGORIES = ["Data & AI","Software Engineering","Business & Functional Analysis","Project, Product & Agile Mgmt","IT Infra, Security & Support","Design & UX","Other/Management"];
+function mulberry32(a){return function(){let t=(a+=0x6d2b79f5);t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+function gaussian(rand){let u=0,v=0;while(u===0)u=rand();while(v===0)v=rand();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+function generateDataset(){
+  const rand=mulberry32(42);
+  const cs={
+    "Data & AI":{n:915,mean:690,sd:132,max:1300},
+    "Software Engineering":{n:1716,mean:609,sd:118,max:1100},
+    "Business & Functional Analysis":{n:1326,mean:627,sd:111,max:1050},
+    "Project, Product & Agile Mgmt":{n:1857,mean:660,sd:125,max:1200},
+    "IT Infra, Security & Support":{n:1308,mean:617,sd:146,max:1050},
+    "Design & UX":{n:87,mean:577,sd:103,max:800},
+    "Other/Management":{n:150,mean:620,sd:130,max:1100},
+  };
+  const mix={"Data & AI":{medior:264,senior:405},"Software Engineering":{medior:363,senior:894},"Business & Functional Analysis":{medior:315,senior:564},"Project, Product & Agile Mgmt":{medior:285,senior:753}};
+  const up={"Data & AI":0.236,"Software Engineering":0.182,"Business & Functional Analysis":0.182,"Project, Product & Agile Mgmt":0.167};
+  const jobs=[];
+  for(const cat of CATEGORIES){
+    const spec=cs[cat];const uplift=up[cat]??0.18;
+    let mediorTarget=Math.round((mix[cat]&&mix[cat].medior)??Math.round(spec.n*0.28));
+    let seniorTarget=Math.round((mix[cat]&&mix[cat].senior)??Math.round(spec.n*0.48));
+    let remaining=spec.n-mediorTarget-seniorTarget;
+    let juniorTarget=Math.max(0,Math.round(remaining*0.25));
+    let unspecifiedTarget=Math.max(0,remaining-juniorTarget);
+    const buckets=[...Array(mediorTarget).fill("Medior"),...Array(seniorTarget).fill("Senior/Expert"),...Array(juniorTarget).fill("Junior"),...Array(unspecifiedTarget).fill("Unspecified")];
+    for(let i=0;i<spec.n;i++){
+      const base=spec.mean+gaussian(rand)*spec.sd;
+      let rate=clamp(Math.round(base),300,spec.max);
+      const s=buckets[i]??"Unspecified";
+      if(s==="Senior/Expert")rate=Math.round(rate*(1+uplift));
+      if(s==="Junior")rate=Math.round(rate*0.85);
+      rate=clamp(Math.round(rate*0.95),285,1281);
+      jobs.push({category:cat,rate:rate,seniority:s});
+    }
+  }
+  return jobs;
+}
+function percentile(s,p){const idx=(p/100)*(s.length-1);const lo=Math.floor(idx),hi=Math.ceil(idx);if(lo===hi)return s[lo];const h=idx-lo;return Math.round(s[lo]*(1-h)+s[hi]*h);}
+function median(nums){if(!nums.length)return 0;const s=[...nums].sort((a,b)=>a-b);return percentile(s,50);}
+
+const DATA = generateDataset();
+const SEN_MAP = {Junior:"Junior", Mid:"Medior", Senior:"Senior/Expert"};
+function domMedian(cat,sen){return median(DATA.filter(j=>j.category===cat&&j.seniority===SEN_MAP[sen]).map(j=>j.rate));}
+
+/* Roles: name, domain, premium (derived from RateNavigator skill table) */
+const ROLES = [
+  {n:"Data Engineer",d:"Data & AI",p:0},{n:"Data Analyst",d:"Data & AI",p:-0.05},{n:"Data Scientist",d:"Data & AI",p:0.077},{n:"ML/AI Engineer",d:"Data & AI",p:0.077},{n:"BI Developer (Power BI)",d:"Data & AI",p:-0.154},{n:"Analytics Engineer",d:"Data & AI",p:0.05},
+  {n:"Software Developer",d:"Software Engineering",p:0},{n:"Frontend Developer (React)",d:"Software Engineering",p:0.06},{n:"Backend Developer",d:"Software Engineering",p:0.03},{n:"Full-stack Developer",d:"Software Engineering",p:0.06},{n:"Mainframe/COBOL Developer",d:"Software Engineering",p:0.083},
+  {n:"Business Analyst",d:"Business & Functional Analysis",p:0},{n:"Functional Analyst",d:"Business & Functional Analysis",p:-0.03},{n:"Product Owner Analyst",d:"Business & Functional Analysis",p:0.05},
+  {n:"Project Manager",d:"Project, Product & Agile Mgmt",p:0},{n:"Product Manager",d:"Project, Product & Agile Mgmt",p:0.05},{n:"Scrum Master",d:"Project, Product & Agile Mgmt",p:-0.03},{n:"Agile Coach",d:"Project, Product & Agile Mgmt",p:0.05},{n:"Program Manager",d:"Project, Product & Agile Mgmt",p:0.1},
+  {n:"Cloud Engineer (Azure)",d:"IT Infra, Security & Support",p:0.083},{n:"DevOps Engineer",d:"IT Infra, Security & Support",p:0.1},{n:"Security Engineer",d:"IT Infra, Security & Support",p:0.133},{n:"System Administrator",d:"IT Infra, Security & Support",p:-0.05},{n:"Support Engineer",d:"IT Infra, Security & Support",p:-0.1},
+  {n:"UX Designer",d:"Design & UX",p:0},{n:"UI Designer",d:"Design & UX",p:0},{n:"Product Designer",d:"Design & UX",p:0.05},
+  {n:"IT Manager",d:"Other/Management",p:0.1},{n:"Consultant",d:"Other/Management",p:0},{n:"SAP Consultant",d:"Other/Management",p:0.2},
+];
+
+/* Precompute daily freelancer rate per role+seniority, with monotonic guard */
+const SENIORITIES = ["Junior","Mid","Senior"];
+const SEN_ABBR = {Junior:"Jnr", Mid:"Mid", Senior:"Snr"};
+const RATE = {}; // RATE[roleName][seniority] = daily €
+for (const r of ROLES) {
+  let j = Math.round(domMedian(r.d,"Junior")*(1+r.p));
+  let m = Math.round(domMedian(r.d,"Mid")*(1+r.p));
+  let s = Math.round(domMedian(r.d,"Senior")*(1+r.p));
+  // monotonic guard: junior <= mid <= senior
+  if (m < j) j = Math.round(m*0.88);
+  if (s < m) s = Math.round(m*1.12);
+  RATE[r.n] = {Junior:j, Mid:m, Senior:s};
+}
+
+const STAFF_MARKUP = 0.08;
+const AGENCY_MARKUP = 0.20;
+const DAYS_PER_MONTH = 20;
+const MONTH_OPTS = [3,6,12,24,48];
+
+/* ============================================================
+   2. STATE
+   ============================================================ */
+let activeDomains = new Set();            // empty = all
+const selections = new Map();             // key "role|sen" -> {role, sen, months, qty}
+const selKey = (role,sen) => role + "|" + sen;
+const euro = n => "€" + Math.round(n).toLocaleString("en-US").replace(/,/g," ");
+
+/* ============================================================
+   3. STEP 1 — DOMAINS + ROLES
+   ============================================================ */
+const domainChips = document.getElementById("domainChips");
+const roleGrid = document.getElementById("roleGrid");
+
+function renderDomains(){
+  domainChips.innerHTML = "";
+  const all = document.createElement("button");
+  all.className = "chip domain" + (activeDomains.size===0 ? " on" : "");
+  all.textContent = "All domains";
+  all.onclick = () => { activeDomains.clear(); renderDomains(); renderRoles(); };
+  domainChips.appendChild(all);
+  for (const d of CATEGORIES){
+    const c = document.createElement("button");
+    c.className = "chip domain" + (activeDomains.has(d) ? " on" : "");
+    c.textContent = d;
+    c.onclick = () => {
+      if (activeDomains.has(d)) activeDomains.delete(d); else activeDomains.add(d);
+      renderDomains(); renderRoles();
+    };
+    domainChips.appendChild(c);
+  }
+}
+
+function renderRoles(){
+  roleGrid.innerHTML = "";
+  const list = ROLES.filter(r => activeDomains.size===0 || activeDomains.has(r.d));
+  if (!list.length){ roleGrid.innerHTML = '<p class="empty">No roles for this filter.</p>'; return; }
+  for (const r of list){
+    const card = document.createElement("div");
+    const anySel = SENIORITIES.some(s => selections.has(selKey(r.n,s)));
+    card.className = "role" + (anySel ? " has-sel" : "");
+    const head = document.createElement("div");
+    head.innerHTML = `<div class="role-name">${r.n}</div>`;
+    card.appendChild(head);
+    const sens = document.createElement("div");
+    sens.className = "role-sens";
+    for (const s of SENIORITIES){
+      const b = document.createElement("button");
+      b.className = "sen" + (selections.has(selKey(r.n,s)) ? " on" : "");
+      b.textContent = SEN_ABBR[s];
+      b.onclick = () => toggleSelection(r.n, s);
+      sens.appendChild(b);
+    }
+    card.appendChild(sens);
+    roleGrid.appendChild(card);
+  }
+}
+
+function toggleSelection(role, sen){
+  const k = selKey(role,sen);
+  if (selections.has(k)) selections.delete(k);
+  else selections.set(k, {role, sen, months:12, qty:1});
+  renderRoles();
+  renderSelbar();
+}
+
+function renderSelbar(){
+  const selbar = document.getElementById("selbar");
+  const pills = document.getElementById("selpills");
+  const arr = [...selections.values()];
+  document.getElementById("toStep2").disabled = arr.length===0;
+  if (!arr.length){ selbar.style.display="none"; return; }
+  selbar.style.display="block";
+  pills.innerHTML = "";
+  for (const sel of arr){
+    const p = document.createElement("span");
+    p.className = "selpill";
+    p.innerHTML = `<span><b>${sel.sen}</b> ${sel.role}</span>`;
+    const x = document.createElement("button");
+    x.className = "x"; x.innerHTML = "&times;"; x.title = "Remove";
+    x.onclick = () => { selections.delete(selKey(sel.role,sel.sen)); renderRoles(); renderSelbar(); };
+    p.appendChild(x);
+    pills.appendChild(p);
+  }
+}
+
+/* ============================================================
+   4. STEP 2 — ROWS
+   ============================================================ */
+function renderRows(){
+  const wrap = document.getElementById("rows");
+  wrap.innerHTML = "";
+  for (const sel of selections.values()){
+    const row = document.createElement("div");
+    row.className = "row";
+    // profile
+    const prof = document.createElement("div");
+    prof.className = "profile";
+    prof.innerHTML = `<div class="nm">${sel.sen} ${sel.role}</div><div class="dm">${euro(RATE[sel.role][sel.sen])} / day</div>`;
+    row.appendChild(prof);
+    // quantity
+    const qWrap = document.createElement("div");
+    qWrap.innerHTML = `<span class="field-cap">How many</span>`;
+    const qty = document.createElement("div"); qty.className="qty";
+    const minus = document.createElement("button"); minus.textContent="−";
+    const val = document.createElement("span"); val.className="v"; val.textContent=sel.qty;
+    const plus = document.createElement("button"); plus.textContent="+";
+    minus.disabled = sel.qty<=1;
+    minus.onclick = () => { if(sel.qty>1){sel.qty--; val.textContent=sel.qty; minus.disabled=sel.qty<=1;} };
+    plus.onclick = () => { if(sel.qty<20){sel.qty++; val.textContent=sel.qty; minus.disabled=false;} };
+    qty.append(minus,val,plus); qWrap.appendChild(qty); row.appendChild(qWrap);
+    // months
+    const mWrap = document.createElement("div");
+    mWrap.innerHTML = `<span class="field-cap">Months</span>`;
+    const seg = document.createElement("div"); seg.className="seg";
+    for (const mo of MONTH_OPTS){
+      const b = document.createElement("button");
+      b.textContent = mo; if (mo===sel.months) b.classList.add("on");
+      b.onclick = () => { sel.months=mo; [...seg.children].forEach(c=>c.classList.remove("on")); b.classList.add("on"); };
+      seg.appendChild(b);
+    }
+    mWrap.appendChild(seg); row.appendChild(mWrap);
+    // delete
+    const del = document.createElement("button"); del.className="del"; del.innerHTML="&times;"; del.title="Remove";
+    del.onclick = () => { selections.delete(selKey(sel.role,sel.sen)); renderRows(); if(!selections.size) go(1); };
+    row.appendChild(del);
+    wrap.appendChild(row);
+  }
+}
+
+/* ============================================================
+   5. STEP 3 — RESULTS
+   ============================================================ */
+function renderResults(){
+  const body = document.getElementById("resBody");
+  const foot = document.getElementById("resFoot");
+  body.innerHTML = "";
+  let tF=0, tS=0, tA=0;
+  for (const sel of selections.values()){
+    const daily = RATE[sel.role][sel.sen];
+    const days = DAYS_PER_MONTH * sel.months * sel.qty;
+    const free = daily * days;
+    const staff = free * (1+STAFF_MARKUP);
+    const agency = free * (1+AGENCY_MARKUP);
+    tF+=free; tS+=staff; tA+=agency;
+    const qtyTxt = sel.qty>1 ? `${sel.qty}× ` : "";
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      `<td><div class="pname">${qtyTxt}${sel.sen} ${sel.role}</div><div class="pmeta">${sel.months} months · ${euro(daily)}/day</div></td>`+
+      `<td><span class="amt">${euro(free)}</span><span class="perday">${euro(daily)}/day</span></td>`+
+      `<td><span class="amt staff">${euro(staff)}</span><span class="perday">${euro(daily*(1+STAFF_MARKUP))}/day</span></td>`+
+      `<td><span class="amt agency">${euro(agency)}</span><span class="perday">${euro(daily*(1+AGENCY_MARKUP))}/day</span></td>`;
+    body.appendChild(tr);
+  }
+  foot.innerHTML =
+    `<tr><td>Total</td>`+
+    `<td><span class="amt">${euro(tF)}</span></td>`+
+    `<td><span class="amt staff">${euro(tS)}</span></td>`+
+    `<td><span class="amt agency">${euro(tA)}</span></td></tr>`;
+
+  const savings = tA - tS;
+  document.getElementById("saveBig").textContent = euro(savings);
+  document.getElementById("saveNote").textContent =
+    `compared to a traditional agency, over your selected duration (excl. VAT)`;
+  document.getElementById("quoteCta").href = buildMailto();
+}
+
+function buildMailto(){
+  const lines = [...selections.values()].map(sel => {
+    const q = sel.qty>1 ? `${sel.qty}× ` : "";
+    return `- ${q}${sel.sen} ${sel.role} — ${sel.months} months`;
+  }).join("\n");
+  const subject = "Make my personalized offer";
+  const body =
+    "Dear,\n\n" +
+    "I am interested in the following profiles:\n\n" +
+    lines + "\n\n" +
+    "Let's talk this through.\n\n" +
+    "Kind regards,";
+  return "mailto:info@staffit.be?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+}
+
+/* ============================================================
+   6. NAVIGATION
+   ============================================================ */
+function go(step){
+  for (const n of [1,2,3]){
+    document.getElementById("panel"+n).classList.toggle("active", n===step);
+    const ind = document.getElementById("ind"+n);
+    ind.classList.toggle("active", n===step);
+    ind.classList.toggle("done", n<step);
+  }
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+document.getElementById("toStep2").onclick = () => { renderRows(); go(2); };
+document.getElementById("backTo1").onclick = () => go(1);
+document.getElementById("toStep3").onclick = () => { renderResults(); go(3); };
+document.getElementById("backTo2").onclick = () => { renderRows(); go(2); };
+
+/* init */
+renderDomains();
+renderRoles();
+renderSelbar();
+</script>
+</body>
+</html>
