@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Staff-IT Rate Calculator</title>
+<title>Staff-IT Savings Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -36,59 +36,85 @@
     font-family: var(--font);
     color: var(--ink);
     background: var(--bg);
-    line-height: 1.5;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+    font-size: 14px;
   }
 
   .sit-wrap {
-    max-width: 1040px;
+    max-width: 800px;
     margin: 0 auto;
-    padding: 28px 20px 64px;
+    padding: 26px 24px 76px;
   }
 
   /* ---------- Header ---------- */
   .sit-head {
-    display: flex; align-items: center; gap: 14px;
-    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 12px;
+    height: 28px; margin-bottom: 30px;
   }
-  .sit-logo { height: 30px; width: auto; display: block; }
+  /* viewBox is 269×43 (~6.26:1) with preserveAspectRatio="none", so the box
+     must match that ratio or the wordmark stretches. 23px tall → ~144px wide. */
+  .sit-logo { height: 23px; width: 144px; display: block; }
   .sit-logo-fallback {
-    font-weight: 800; font-size: 22px; letter-spacing: -.02em; color: var(--ink);
+    font-weight: 800; font-size: 18px; letter-spacing: -.02em; color: var(--ink); line-height: 1;
   }
   .sit-logo-fallback span { color: var(--brand); }
-  .sit-title { font-size: 28px; font-weight: 800; letter-spacing: -.02em; margin: 18px 0 4px; }
-  .sit-sub { color: var(--muted); margin: 0 0 26px; font-size: 15px; }
+  .sit-title { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 9px; }
+  .sit-sub { color: var(--muted); margin: 0 0 40px; font-size: 13.5px; line-height: 1.6; max-width: 580px; }
 
   /* ---------- Stepper indicator ---------- */
-  .sit-steps { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+  .sit-steps { display: flex; align-items: center; gap: 0; margin-bottom: 44px; }
   .sit-step {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; font-weight: 600; color: var(--muted);
-    padding: 7px 14px; border-radius: 999px; background: var(--bg-alt);
-    border: 1px solid var(--line);
+    display: flex; align-items: center; gap: 9px;
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    white-space: nowrap;
   }
   .sit-step .num {
-    width: 20px; height: 20px; border-radius: 50%; background: #fff;
-    border: 1px solid var(--line); display: grid; place-items: center; font-size: 12px;
+    width: 21px; height: 21px; border-radius: 50%; background: #fff;
+    border: 1.5px solid var(--line); display: grid; place-items: center;
+    font-size: 11.5px; font-weight: 700; flex: none; transition: all .2s ease;
   }
-  .sit-step.active { color: var(--brand); background: var(--brand-soft); border-color: transparent; }
-  .sit-step.active .num { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .sit-step.active { color: var(--brand); }
+  .sit-step.active .num { background: var(--brand); color: #fff; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
   .sit-step.done { color: var(--brand); }
   .sit-step.done .num { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .sit-connector { flex: 1; height: 2px; background: var(--line); margin: 0 12px; border-radius: 2px; min-width: 16px; transition: background .2s ease; }
+  .sit-connector.done { background: var(--brand); }
 
   /* ---------- Panels ---------- */
   .sit-panel { display: none; }
   .sit-panel.active { display: block; animation: fade .25s ease; }
   @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-  .sit-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 12px; }
-  .sit-block { margin-bottom: 30px; }
+  .sit-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 14px; }
+  .sit-block { margin-bottom: 40px; }
+
+  /* ---------- Tooltip ---------- */
+  .tip { position: relative; display: inline-flex; align-items: center; }
+  .tip .ico {
+    width: 14px; height: 14px; border-radius: 50%; border: 1px solid currentColor;
+    font-size: 9.5px; font-weight: 700; display: grid; place-items: center; cursor: help;
+    opacity: .6; font-style: normal; line-height: 1;
+  }
+  .tip .ico:hover { opacity: 1; }
+  .tip .bubble {
+    position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff; padding: 9px 12px; border-radius: 9px;
+    font-size: 11.5px; font-weight: 500; line-height: 1.5; width: 230px; text-align: left;
+    opacity: 0; visibility: hidden; transition: opacity .15s ease; z-index: 30;
+    box-shadow: 0 8px 24px rgba(11,11,22,.22); text-transform: none; letter-spacing: 0;
+  }
+  .tip .bubble::after {
+    content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--ink);
+  }
+  .tip:hover .bubble, .tip:focus-within .bubble { opacity: 1; visibility: visible; }
 
   /* ---------- Chips ---------- */
-  .sit-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sit-chips { display: flex; flex-wrap: wrap; gap: 9px; }
   .chip {
     border: 1px solid var(--line); background: #fff; color: var(--ink);
-    padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 500;
+    padding: 7px 15px; border-radius: 999px; font-size: 13px; font-weight: 500;
     cursor: pointer; transition: all .15s ease; font-family: inherit;
     user-select: none;
   }
@@ -96,38 +122,54 @@
   .chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
   .chip.domain.on { background: var(--brand); }
 
+  /* ---------- Search ---------- */
+  .role-search {
+    width: 100%; padding: 9px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 13px; color: var(--ink); margin-bottom: 16px; background: #fff;
+  }
+  .role-search:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+
   /* ---------- Role cards ---------- */
-  .role-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; }
+  .role-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; }
   .role {
-    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px;
+    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 9px 10px;
     transition: border-color .15s ease, box-shadow .15s ease; background: #fff;
   }
   .role:hover { border-color: var(--brand); }
-  .role-name { font-weight: 600; font-size: 12.5px; line-height: 1.25; }
-  .role-sens { display: flex; gap: 4px; margin-top: 7px; }
+  .role-name { font-weight: 600; font-size: 12px; line-height: 1.3; }
+  .role-sens { display: flex; gap: 4px; margin-top: 9px; }
   .sen {
     flex: 1; text-align: center; border: 1px solid var(--line); background: #fff;
-    border-radius: 6px; padding: 3px 2px; font-size: 10.5px; font-weight: 600; cursor: pointer;
+    border-radius: 6px; padding: 4px 2px; font-size: 10.5px; font-weight: 600; cursor: pointer;
     transition: all .12s ease; font-family: inherit; color: var(--ink);
   }
   .sen:hover { border-color: var(--brand); color: var(--brand); }
   .sen.on { background: var(--brand); border-color: var(--brand); color: #fff; }
   .role.has-sel { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
 
-  .empty { color: var(--muted); font-size: 14px; padding: 18px 0; }
+  .empty { color: var(--muted); font-size: 13px; padding: 18px 0; }
+  .role-hint { color: var(--muted); font-size: 13px; margin: 16px 0 0; }
 
   /* ---------- Selection summary ---------- */
   .selbar {
-    margin-top: 26px; padding: 16px 18px; background: var(--brand-softer);
-    border: 1px solid var(--brand-soft); border-radius: var(--radius);
+    margin-top: 28px; padding: 16px 18px; background: var(--brand-softer);
+    border: 1.5px solid var(--brand-soft); border-radius: var(--radius);
   }
-  .selbar .t { font-size: 13px; font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px; }
+  .selbar .t {
+    font-size: 11px; font-weight: 700; color: var(--brand); text-transform: uppercase;
+    letter-spacing: .06em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .selbar .t .count {
+    background: var(--brand); color: #fff; border-radius: 999px; padding: 2px 9px;
+    font-size: 11px; letter-spacing: 0;
+  }
   .selpills { display: flex; flex-wrap: wrap; gap: 8px; }
   .selpill {
     display: inline-flex; align-items: center; gap: 8px; background: #fff;
-    border: 1px solid var(--brand-soft); border-radius: 999px; padding: 6px 8px 6px 14px;
-    font-size: 13px; font-weight: 500;
+    border: 1px solid var(--brand-soft); border-radius: 999px; padding: 6px 8px 6px 13px;
+    font-size: 12.5px; font-weight: 500;
   }
+  .selpill .q { background: var(--brand-soft); color: var(--brand); font-weight: 700; border-radius: 6px; padding: 1px 7px; font-size: 11px; }
   .selpill b { font-weight: 700; }
   .selpill .x {
     cursor: pointer; width: 18px; height: 18px; border-radius: 50%; background: var(--brand-soft);
@@ -138,69 +180,117 @@
   /* ---------- Rows (step 2) ---------- */
   .rows { display: flex; flex-direction: column; gap: 12px; }
   .row {
-    display: grid; grid-template-columns: 1fr auto auto auto; gap: 18px; align-items: center;
+    display: grid; grid-template-columns: 1.3fr auto 2fr auto; gap: 20px; align-items: start;
     border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; background: #fff;
   }
-  .row .profile .nm { font-weight: 600; }
-  .row .profile .dm { font-size: 12px; color: var(--muted); }
-  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
-  .seg button {
-    border: none; background: #fff; padding: 7px 13px; font-size: 13px; font-weight: 600; cursor: pointer;
-    font-family: inherit; color: var(--ink); transition: all .12s;
-  }
-  .seg button + button { border-left: 1px solid var(--line); }
-  .seg button.on { background: var(--brand); color: #fff; }
-  .field-cap { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; display: block; }
-  .qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; }
-  .qty button { width: 32px; height: 32px; border: none; background: #fff; font-size: 17px; cursor: pointer; color: var(--brand); font-family: inherit; }
+  .row .profile { padding-top: 3px; }
+  .row .profile .nm { font-weight: 600; font-size: 13.5px; }
+  .row .profile .dm { font-size: 11.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; margin-top: 2px; }
+  .field-cap { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 7px; display: block; }
+
+  .qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .qty button { width: 30px; height: 32px; border: none; background: #fff; font-size: 16px; cursor: pointer; color: var(--brand); font-family: inherit; }
   .qty button:disabled { color: var(--line); cursor: not-allowed; }
-  .qty .v { width: 34px; text-align: center; font-weight: 700; font-size: 14px; }
-  .row .del { border: none; background: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 6px; border-radius: 8px; }
+  .qty .v { width: 36px; height: 32px; text-align: center; font-weight: 700; font-size: 13.5px; border: none; border-left: 1px solid var(--line); border-right: 1px solid var(--line); font-family: inherit; color: var(--ink); -moz-appearance: textfield; }
+  .qty .v::-webkit-outer-spin-button, .qty .v::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .dur { min-width: 220px; }
+  .dur-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .dur-val { font-weight: 700; font-size: 14px; }
+  .dur-val span { color: var(--muted); font-weight: 600; font-size: 11.5px; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 999px; background: var(--brand-soft); outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 17px; height: 17px; border-radius: 50%; background: var(--brand); cursor: pointer; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(11,11,22,.25); }
+  input[type=range]::-moz-range-thumb { width: 17px; height: 17px; border-radius: 50%; background: var(--brand); cursor: pointer; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(11,11,22,.25); }
+  .dur-presets { display: flex; gap: 6px; margin-top: 10px; }
+  .dur-presets button {
+    border: 1px solid var(--line); background: #fff; color: var(--muted); border-radius: 999px;
+    padding: 4px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .dur-presets button:hover { border-color: var(--brand); color: var(--brand); }
+  .dur-presets button.on { background: var(--brand-soft); border-color: var(--brand-soft); color: var(--brand); }
+
+  .row .del { border: none; background: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 6px; border-radius: 8px; align-self: center; }
   .row .del:hover { color: var(--agency); background: var(--agency-soft); }
+
+  /* ---------- Margin control ---------- */
+  .margin-ctl {
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 26px;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap; background: var(--bg-alt);
+  }
+  .margin-ctl .mc-label { font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
+  .margin-ctl .mc-slider { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 14px; }
+  .margin-ctl .mc-val { font-weight: 800; color: var(--agency); font-size: 16px; min-width: 48px; text-align: right; }
 
   /* ---------- Results table ---------- */
   .tablewrap { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
   table.res { width: 100%; border-collapse: collapse; }
-  table.res th, table.res td { padding: 14px 16px; text-align: right; }
+  table.res th, table.res td { padding: 12px 16px; text-align: right; }
   table.res th:first-child, table.res td:first-child { text-align: left; }
-  table.res thead th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--bg-alt); font-weight: 700; border-bottom: 1px solid var(--line); }
+  table.res thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--bg-alt); font-weight: 700; border-bottom: 1px solid var(--line); }
   table.res thead th.staff { color: var(--brand); }
   table.res thead th.agency { color: var(--agency); }
-  table.res th .pct { display: block; font-size: 11px; font-weight: 600; opacity: .85; }
+  table.res th .pct { display: block; font-size: 10.5px; font-weight: 600; opacity: .85; }
   table.res tbody td { border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
   table.res tbody tr:last-child td { border-bottom: none; }
-  .amt { font-weight: 700; font-size: 15px; }
+  .amt { font-weight: 700; font-size: 14px; }
   .amt.staff { color: var(--brand); }
   .amt.agency { color: var(--agency); }
-  .perday { display: block; font-size: 11px; color: var(--muted); font-weight: 500; }
-  .pname { font-weight: 600; }
-  .pmeta { font-size: 12px; color: var(--muted); }
-  table.res tfoot td { padding: 14px 16px; font-weight: 700; background: var(--bg-alt); border-top: 2px solid var(--line); font-variant-numeric: tabular-nums; }
+  .perday { display: block; font-size: 10.5px; color: var(--muted); font-weight: 500; }
+  .pname { font-weight: 600; font-size: 13.5px; }
+  .pmeta { font-size: 11.5px; color: var(--muted); }
+  table.res tfoot td { padding: 13px 16px; font-weight: 700; background: var(--bg-alt); border-top: 2px solid var(--line); font-variant-numeric: tabular-nums; }
   table.res tfoot .amt.staff { color: var(--brand); }
   table.res tfoot .amt.agency { color: var(--agency); }
 
+  /* ---------- Bar chart ---------- */
+  .chart { margin-top: 30px; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; }
+  .chart .ct { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 18px; }
+  .bar-row { display: grid; grid-template-columns: 116px 1fr; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-lab { font-size: 12.5px; font-weight: 600; }
+  .bar-lab small { display: block; color: var(--muted); font-weight: 500; font-size: 11px; }
+  .bar-track { position: relative; }
+  .bar { height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: flex-end; padding: 0 11px; color: #fff; font-weight: 700; font-size: 13px; min-width: 58px; transition: width .5s cubic-bezier(.2,.7,.2,1); white-space: nowrap; }
+  .bar.staff { background: linear-gradient(135deg, var(--brand) 0%, #4b2bff 100%); }
+  .bar.agency { background: var(--agency); }
+
   /* ---------- Savings hero ---------- */
   .save-hero {
-    margin-top: 26px; text-align: center; padding: 36px 24px;
+    margin-top: 30px; text-align: center; padding: 32px 24px;
     background: linear-gradient(135deg, var(--brand) 0%, #4b2bff 100%);
     border-radius: var(--radius); color: #fff;
   }
-  .save-hero .lead { font-size: 15px; font-weight: 600; opacity: .92; letter-spacing: .01em; }
-  .save-hero .big { font-size: 52px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0 2px; line-height: 1.05; }
-  .save-hero .note { font-size: 12px; opacity: .8; margin-top: 4px; }
+  .save-hero .lead { font-size: 14px; font-weight: 600; opacity: .92; letter-spacing: .01em; }
+  .save-hero .big { font-size: 44px; font-weight: 800; letter-spacing: -.02em; margin: 8px 0 2px; line-height: 1.05; }
+  .save-hero .note { font-size: 12px; opacity: .82; margin-top: 6px; }
   .save-hero .cta {
-    display: inline-block; margin-top: 22px; background: #fff; color: var(--brand);
-    font-weight: 700; font-size: 15px; padding: 13px 26px; border-radius: 999px; text-decoration: none;
+    display: inline-block; margin-top: 24px; background: #fff; color: var(--brand);
+    font-weight: 700; font-size: 14px; padding: 12px 26px; border-radius: 999px; text-decoration: none;
     transition: transform .12s ease, box-shadow .12s ease;
   }
   .save-hero .cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.18); }
 
-  .footnote { text-align: center; color: var(--muted); font-size: 12px; margin-top: 16px; }
+  /* ---------- "What could you do" equivalents ---------- */
+  .equiv { margin-top: 36px; }
+  .equiv .et { font-size: 16px; font-weight: 800; letter-spacing: -.01em; margin: 0 0 5px; text-align: center; }
+  .equiv .es { text-align: center; color: var(--muted); font-size: 13px; margin: 0 0 22px; }
+  .equiv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 12px; }
+  .eq-card {
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 16px; text-align: center;
+    background: #fff; transition: border-color .15s ease, transform .15s ease;
+  }
+  .eq-card:hover { border-color: var(--brand); transform: translateY(-2px); }
+  .eq-card .emoji { font-size: 26px; line-height: 1; }
+  .eq-card .num { font-size: 22px; font-weight: 800; color: var(--brand); margin: 9px 0 2px; letter-spacing: -.02em; }
+  .eq-card .lbl { font-size: 12.5px; color: var(--muted); font-weight: 500; line-height: 1.4; }
+
+  .footnote { text-align: center; color: var(--muted); font-size: 11.5px; margin-top: 24px; line-height: 1.55; max-width: 620px; margin-left: auto; margin-right: auto; }
 
   /* ---------- Buttons ---------- */
-  .actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; }
+  .actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 38px; flex-wrap: wrap; }
+  .actions .right { display: flex; gap: 10px; align-items: center; }
   .btn {
-    font-family: inherit; font-weight: 700; font-size: 15px; padding: 13px 28px; border-radius: 999px;
+    font-family: inherit; font-weight: 700; font-size: 14px; padding: 11px 24px; border-radius: 999px;
     cursor: pointer; border: 1px solid var(--brand); transition: all .15s ease;
   }
   .btn-primary { background: var(--brand); color: #fff; }
@@ -208,12 +298,54 @@
   .btn-primary:disabled { background: var(--line); border-color: var(--line); color: #fff; cursor: not-allowed; }
   .btn-ghost { background: #fff; color: var(--brand); }
   .btn-ghost:hover { background: var(--brand-soft); }
+  a.btn { display: inline-block; text-decoration: none; text-align: center; }
 
-  @media (max-width: 640px) {
-    .row { grid-template-columns: 1fr; gap: 14px; }
-    .save-hero .big { font-size: 40px; }
-    table.res th, table.res td { padding: 11px 10px; }
-    .amt { font-size: 13px; }
+  /* ---------- Print icon (top-right of results) ---------- */
+  .panel-toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+  .print-ico {
+    border: 1px solid var(--line); background: #fff; color: var(--brand);
+    width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center;
+    cursor: pointer; transition: all .15s ease; padding: 0;
+  }
+  .print-ico:hover { border-color: var(--brand); background: var(--brand-soft); }
+  .print-ico svg { width: 18px; height: 18px; display: block; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 760px) {
+    .row { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .row .profile { grid-column: 1 / -1; }
+    .row .dur { grid-column: 1 / -1; min-width: 0; }
+    .row .del { grid-column: 2; justify-self: end; }
+  }
+  @media (max-width: 620px) {
+    .sit-wrap { padding: 22px 16px 60px; }
+    .sit-title { font-size: 20px; }
+    .sit-step { font-size: 0; gap: 0; }            /* hide labels, keep numbered circles */
+    .sit-step .num { font-size: 11.5px; }
+    .sit-connector { margin: 0 6px; }
+    .save-hero .big { font-size: 34px; }
+    /* stacked results table */
+    table.res thead { display: none; }
+    table.res, table.res tbody, table.res tfoot, table.res tr, table.res td { display: block; width: 100%; }
+    table.res tr { border-bottom: 1px solid var(--line); padding: 6px 0; }
+    table.res tbody td, table.res tfoot td { display: flex; justify-content: space-between; align-items: center; text-align: right; border: none; padding: 8px 16px; }
+    table.res td::before { content: attr(data-label); font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+    table.res tbody td:first-child::before { content: ""; }
+    table.res tbody td:first-child { display: block; text-align: left; padding-bottom: 2px; }
+    .perday { display: inline; margin-left: 6px; }
+    .bar-row { grid-template-columns: 1fr; gap: 6px; }
+    .actions { flex-direction: column-reverse; align-items: stretch; }
+    .actions .right { flex-direction: column; }
+    .btn { width: 100%; text-align: center; }
+  }
+
+  /* ---------- Print / PDF ---------- */
+  @media print {
+    .sit-steps, .actions, .role-search, .margin-ctl .mc-slider input, .save-hero .cta, .panel-toolbar { display: none !important; }
+    .save-hero { background: var(--brand) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .bar.staff, .bar.agency { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sit-panel { display: block !important; }
+    #panel1, #panel2 { display: none !important; }
   }
 </style>
 </head>
@@ -226,29 +358,33 @@
          alt="Staff-IT" onerror="this.style.display='none';document.getElementById('logoFb').style.display='block';" />
     <div id="logoFb" class="sit-logo-fallback" style="display:none;">Staff<span>-IT</span></div>
   </div>
-  <h1 class="sit-title">Rate Calculator</h1>
-  <p class="sit-sub">Build your team, pick a duration, and see exactly how much you save with Staff-IT versus a traditional agency.</p>
+  <h1 class="sit-title">Savings Calculator</h1>
+  <p class="sit-sub">Build your team, set the duration, and see exactly how much you save with Staff-IT versus a traditional agency.</p>
 
   <!-- Steps -->
   <div class="sit-steps">
-    <div class="sit-step active" id="ind1"><span class="num">1</span> Select profiles</div>
+    <div class="sit-step active" id="ind1"><span class="num">1</span> Build your team</div>
+    <div class="sit-connector" id="con1"></div>
     <div class="sit-step" id="ind2"><span class="num">2</span> Set duration &amp; quantity</div>
+    <div class="sit-connector" id="con2"></div>
     <div class="sit-step" id="ind3"><span class="num">3</span> Your savings</div>
   </div>
 
   <!-- STEP 1: SELECT -->
   <div class="sit-panel active" id="panel1">
     <div class="sit-block">
-      <p class="sit-label">1 · Filter by domain</p>
+      <p class="sit-label">1 · Pick one or more domains</p>
       <div class="sit-chips" id="domainChips"></div>
+      <p class="role-hint" id="roleHint">👆 Select a domain above to reveal the roles you can choose from.</p>
     </div>
-    <div class="sit-block">
+    <div class="sit-block" id="rolesBlock" style="display:none;">
       <p class="sit-label">2 · Pick roles &amp; seniority</p>
+      <input type="text" class="role-search" id="roleSearch" placeholder="Search a role… (e.g. data scientist, devops)" />
       <div class="role-grid" id="roleGrid"></div>
     </div>
 
     <div class="selbar" id="selbar" style="display:none;">
-      <div class="t">Your selection</div>
+      <div class="t">Your team <span class="count" id="selCount">0</span></div>
       <div class="selpills" id="selpills"></div>
     </div>
 
@@ -260,29 +396,60 @@
 
   <!-- STEP 2: CONFIGURE -->
   <div class="sit-panel" id="panel2">
-    <p class="sit-label">For each profile, set how long you want to hire and how many you need</p>
+    <p class="sit-label">For each profile, set how many you need and how long you want to hire</p>
     <div class="rows" id="rows"></div>
+
     <div class="actions">
       <button class="btn btn-ghost" id="backTo1">&larr; Back</button>
-      <button class="btn btn-primary" id="toStep3">Show me how much I will save &rarr;</button>
+      <button class="btn btn-primary" id="toStep3">Show me how much I'll save &rarr;</button>
     </div>
   </div>
 
   <!-- STEP 3: RESULTS -->
   <div class="sit-panel" id="panel3">
+
+    <div class="panel-toolbar">
+      <button class="print-ico" id="printBtn" title="Print / save as PDF" aria-label="Print summary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      </button>
+    </div>
+
+    <div class="margin-ctl">
+      <span class="mc-label">
+        Compare against an agency margin of
+        <span class="tip"><span class="ico" tabindex="0">i</span><span class="bubble">Traditional staffing agencies typically apply a 15–35% margin on the consultant's daily rate. Staff-IT works at a flat 8%. Drag to match the margin you're benchmarking against.</span></span>
+      </span>
+      <div class="mc-slider">
+        <input type="range" id="agencyMargin" min="15" max="35" step="1" value="20" />
+        <span class="mc-val" id="agencyMarginVal">20%</span>
+      </div>
+    </div>
+
     <div class="tablewrap">
       <table class="res">
         <thead>
           <tr>
             <th>Profile</th>
-            <th>Freelancer rate</th>
-            <th class="staff">Staff-IT <span class="pct">with 8%</span></th>
-            <th class="agency">Other Agency <span class="pct">20%</span></th>
+            <th class="staff">Staff-IT <span class="pct">8% margin</span></th>
+            <th class="agency">Other Agency <span class="pct" id="agencyPctHead">20% margin</span></th>
           </tr>
         </thead>
         <tbody id="resBody"></tbody>
         <tfoot id="resFoot"></tfoot>
       </table>
+    </div>
+
+    <!-- Bar chart -->
+    <div class="chart">
+      <div class="ct">Total cost over your selected duration</div>
+      <div class="bar-row">
+        <div class="bar-lab">Staff-IT<small>8% margin</small></div>
+        <div class="bar-track"><div class="bar staff" id="barStaff" style="width:0">€0</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab">Other Agency<small id="barAgencyLab">20% margin</small></div>
+        <div class="bar-track"><div class="bar agency" id="barAgency" style="width:0">€0</div></div>
+      </div>
     </div>
 
     <div class="save-hero">
@@ -291,11 +458,21 @@
       <div class="note" id="saveNote"></div>
       <a class="cta" id="quoteCta" href="#">Want a personalized quote? Click here &rarr;</a>
     </div>
-    <p class="footnote">All amounts are excl. VAT and based on 20 working days per month. Rates are indicative market medians.</p>
+
+    <!-- What could you do with this money -->
+    <div class="equiv">
+      <p class="et">What could you do with that?</p>
+      <p class="es">Your savings, made tangible. Indicative examples only.</p>
+      <div class="equiv-grid" id="equivGrid"></div>
+    </div>
+
+    <p class="footnote" id="footnote"></p>
 
     <div class="actions">
       <button class="btn btn-ghost" id="backTo2">&larr; Adjust selection</button>
-      <span></span>
+      <div class="right">
+        <a class="btn btn-primary" id="quoteBtn2" href="#">Request a personalized quote &rarr;</a>
+      </div>
     </div>
   </div>
 
@@ -349,6 +526,7 @@ function median(nums){if(!nums.length)return 0;const s=[...nums].sort((a,b)=>a-b
 const DATA = generateDataset();
 const SEN_MAP = {Junior:"Junior", Mid:"Medior", Senior:"Senior/Expert"};
 function domMedian(cat,sen){return median(DATA.filter(j=>j.category===cat&&j.seniority===SEN_MAP[sen]).map(j=>j.rate));}
+function domCount(cat,sen){return DATA.filter(j=>j.category===cat&&j.seniority===SEN_MAP[sen]).length;}
 
 /* Roles: name, domain, premium (derived from RateNavigator skill table) */
 const ROLES = [
@@ -361,7 +539,7 @@ const ROLES = [
   {n:"IT Manager",d:"Other/Management",p:0.1},{n:"Consultant",d:"Other/Management",p:0},{n:"SAP Consultant",d:"Other/Management",p:0.2},
 ];
 
-/* Precompute daily freelancer rate per role+seniority, with monotonic guard */
+/* Precompute daily market (median) rate per role+seniority, with monotonic guard */
 const SENIORITIES = ["Junior","Mid","Senior"];
 const SEN_ABBR = {Junior:"Jnr", Mid:"Mid", Senior:"Snr"};
 const RATE = {}; // RATE[roleName][seniority] = daily €
@@ -374,16 +552,17 @@ for (const r of ROLES) {
   if (s < m) s = Math.round(m*1.12);
   RATE[r.n] = {Junior:j, Mid:m, Senior:s};
 }
+const ROLE_BY_NAME = Object.fromEntries(ROLES.map(r => [r.n, r]));
 
 const STAFF_MARKUP = 0.08;
-const AGENCY_MARKUP = 0.20;
 const DAYS_PER_MONTH = 20;
-const MONTH_OPTS = [3,6,12,24,48];
+const DUR_PRESETS = [3,6,12,24,48];
 
 /* ============================================================
    2. STATE
    ============================================================ */
 let activeDomains = new Set();            // empty = all
+let agencyMarkup = 0.20;                  // adjustable reference margin (step 3)
 const selections = new Map();             // key "role|sen" -> {role, sen, months, qty}
 const selKey = (role,sen) => role + "|" + sen;
 const euro = n => "€" + Math.round(n).toLocaleString("en-US").replace(/,/g," ");
@@ -393,14 +572,10 @@ const euro = n => "€" + Math.round(n).toLocaleString("en-US").replace(/,/g," "
    ============================================================ */
 const domainChips = document.getElementById("domainChips");
 const roleGrid = document.getElementById("roleGrid");
+const roleSearch = document.getElementById("roleSearch");
 
 function renderDomains(){
   domainChips.innerHTML = "";
-  const all = document.createElement("button");
-  all.className = "chip domain" + (activeDomains.size===0 ? " on" : "");
-  all.textContent = "All domains";
-  all.onclick = () => { activeDomains.clear(); renderDomains(); renderRoles(); };
-  domainChips.appendChild(all);
   for (const d of CATEGORIES){
     const c = document.createElement("button");
     c.className = "chip domain" + (activeDomains.has(d) ? " on" : "");
@@ -413,10 +588,29 @@ function renderDomains(){
   }
 }
 
+function rateTip(r, sen){
+  const n = domCount(r.d, sen);
+  return `Indicative ${euro(RATE[r.n][sen])}/day — the median of ${n.toLocaleString("en-US")} comparable freelance assignments in ${r.d} (${sen}). Excl. VAT.`;
+}
+
 function renderRoles(){
+  const rolesBlock = document.getElementById("rolesBlock");
+  const roleHint = document.getElementById("roleHint");
+  // Progressive disclosure: roles stay hidden until a domain is chosen.
+  if (activeDomains.size === 0){
+    rolesBlock.style.display = "none";
+    roleHint.style.display = "block";
+    return;
+  }
+  rolesBlock.style.display = "block";
+  roleHint.style.display = "none";
   roleGrid.innerHTML = "";
-  const list = ROLES.filter(r => activeDomains.size===0 || activeDomains.has(r.d));
-  if (!list.length){ roleGrid.innerHTML = '<p class="empty">No roles for this filter.</p>'; return; }
+  const q = (roleSearch.value || "").trim().toLowerCase();
+  const list = ROLES.filter(r =>
+    activeDomains.has(r.d) &&
+    (!q || r.n.toLowerCase().includes(q) || r.d.toLowerCase().includes(q))
+  );
+  if (!list.length){ roleGrid.innerHTML = '<p class="empty">No roles match your search.</p>'; return; }
   for (const r of list){
     const card = document.createElement("div");
     const anySel = SENIORITIES.some(s => selections.has(selKey(r.n,s)));
@@ -430,6 +624,7 @@ function renderRoles(){
       const b = document.createElement("button");
       b.className = "sen" + (selections.has(selKey(r.n,s)) ? " on" : "");
       b.textContent = SEN_ABBR[s];
+      b.title = rateTip(r, s);
       b.onclick = () => toggleSelection(r.n, s);
       sens.appendChild(b);
     }
@@ -451,23 +646,46 @@ function renderSelbar(){
   const pills = document.getElementById("selpills");
   const arr = [...selections.values()];
   document.getElementById("toStep2").disabled = arr.length===0;
+  document.getElementById("selCount").textContent = arr.reduce((a,s)=>a+s.qty,0);
   if (!arr.length){ selbar.style.display="none"; return; }
   selbar.style.display="block";
   pills.innerHTML = "";
   for (const sel of arr){
     const p = document.createElement("span");
     p.className = "selpill";
-    p.innerHTML = `<span><b>${sel.sen}</b> ${sel.role}</span>`;
+    const qTxt = sel.qty>1 ? `<span class="q">${sel.qty}×</span>` : "";
+    p.innerHTML = `${qTxt}<span><b>${sel.sen}</b> ${sel.role}</span>`;
     const x = document.createElement("button");
     x.className = "x"; x.innerHTML = "&times;"; x.title = "Remove";
     x.onclick = () => { selections.delete(selKey(sel.role,sel.sen)); renderRoles(); renderSelbar(); };
     p.appendChild(x);
     pills.appendChild(p);
   }
+  updateLive();
 }
 
 /* ============================================================
-   4. STEP 2 — ROWS
+   4. SHARED TOTALS + LIVE PREVIEW
+   ============================================================ */
+function computeTotals(){
+  let tStaff=0, tAgency=0, tBase=0, days=0, head=0;
+  for (const sel of selections.values()){
+    const daily = RATE[sel.role][sel.sen];
+    const d = DAYS_PER_MONTH * sel.months * sel.qty;
+    const base = daily * d;
+    tBase += base;
+    tStaff += base * (1+STAFF_MARKUP);
+    tAgency += base * (1+agencyMarkup);
+    days += d;
+    head += sel.qty;
+  }
+  return {tStaff, tAgency, tBase, days, head, savings: tAgency - tStaff};
+}
+
+function updateLive(){ /* savings are intentionally revealed only on the final step */ }
+
+/* ============================================================
+   5. STEP 2 — ROWS
    ============================================================ */
 function renderRows(){
   const wrap = document.getElementById("rows");
@@ -475,76 +693,138 @@ function renderRows(){
   for (const sel of selections.values()){
     const row = document.createElement("div");
     row.className = "row";
-    // profile
+
+    // profile + rate (with source tooltip)
+    const r = ROLE_BY_NAME[sel.role];
     const prof = document.createElement("div");
     prof.className = "profile";
-    prof.innerHTML = `<div class="nm">${sel.sen} ${sel.role}</div><div class="dm">${euro(RATE[sel.role][sel.sen])} / day</div>`;
+    prof.innerHTML =
+      `<div class="nm">${sel.sen} ${sel.role}</div>`+
+      `<div class="dm">${euro(RATE[sel.role][sel.sen])} / day `+
+      `<span class="tip"><span class="ico" tabindex="0">i</span><span class="bubble">${rateTip(r, sel.sen)}</span></span></div>`;
     row.appendChild(prof);
-    // quantity
+
+    // quantity (editable number + steppers)
     const qWrap = document.createElement("div");
     qWrap.innerHTML = `<span class="field-cap">How many</span>`;
     const qty = document.createElement("div"); qty.className="qty";
     const minus = document.createElement("button"); minus.textContent="−";
-    const val = document.createElement("span"); val.className="v"; val.textContent=sel.qty;
+    const val = document.createElement("input"); val.className="v"; val.type="number"; val.min="1"; val.max="20"; val.value=sel.qty;
     const plus = document.createElement("button"); plus.textContent="+";
-    minus.disabled = sel.qty<=1;
-    minus.onclick = () => { if(sel.qty>1){sel.qty--; val.textContent=sel.qty; minus.disabled=sel.qty<=1;} };
-    plus.onclick = () => { if(sel.qty<20){sel.qty++; val.textContent=sel.qty; minus.disabled=false;} };
+    const syncQty = () => { minus.disabled = sel.qty<=1; plus.disabled = sel.qty>=20; val.value=sel.qty; updateLive(); };
+    minus.onclick = () => { if(sel.qty>1){sel.qty--; syncQty();} };
+    plus.onclick  = () => { if(sel.qty<20){sel.qty++; syncQty();} };
+    val.oninput = () => { let v=parseInt(val.value,10); if(isNaN(v)) return; sel.qty=clamp(v,1,20); minus.disabled=sel.qty<=1; plus.disabled=sel.qty>=20; updateLive(); };
+    val.onblur = () => { val.value=sel.qty; };
     qty.append(minus,val,plus); qWrap.appendChild(qty); row.appendChild(qWrap);
-    // months
-    const mWrap = document.createElement("div");
-    mWrap.innerHTML = `<span class="field-cap">Months</span>`;
-    const seg = document.createElement("div"); seg.className="seg";
-    for (const mo of MONTH_OPTS){
-      const b = document.createElement("button");
-      b.textContent = mo; if (mo===sel.months) b.classList.add("on");
-      b.onclick = () => { sel.months=mo; [...seg.children].forEach(c=>c.classList.remove("on")); b.classList.add("on"); };
-      seg.appendChild(b);
+    minus.disabled = sel.qty<=1; plus.disabled = sel.qty>=20;
+
+    // duration (slider + presets)
+    const dur = document.createElement("div");
+    dur.className = "dur";
+    dur.innerHTML =
+      `<div class="dur-top"><span class="field-cap" style="margin:0">Duration</span>`+
+      `<span class="dur-val"><span class="mv">${sel.months}</span> <span>months</span></span></div>`;
+    const slider = document.createElement("input");
+    slider.type="range"; slider.min="1"; slider.max="48"; slider.step="1"; slider.value=sel.months;
+    const presets = document.createElement("div"); presets.className="dur-presets";
+    const mvEl = () => dur.querySelector(".mv");
+    const refreshPresets = () => {
+      [...presets.children].forEach(b => b.classList.toggle("on", parseInt(b.dataset.m,10)===sel.months));
+    };
+    slider.oninput = () => { sel.months=parseInt(slider.value,10); mvEl().textContent=sel.months; refreshPresets(); updateLive(); };
+    for (const mo of DUR_PRESETS){
+      const b = document.createElement("button"); b.textContent=mo+"m"; b.dataset.m=mo;
+      b.onclick = () => { sel.months=mo; slider.value=mo; mvEl().textContent=mo; refreshPresets(); updateLive(); };
+      presets.appendChild(b);
     }
-    mWrap.appendChild(seg); row.appendChild(mWrap);
+    dur.appendChild(slider); dur.appendChild(presets); row.appendChild(dur);
+    refreshPresets();
+
     // delete
     const del = document.createElement("button"); del.className="del"; del.innerHTML="&times;"; del.title="Remove";
-    del.onclick = () => { selections.delete(selKey(sel.role,sel.sen)); renderRows(); if(!selections.size) go(1); };
+    del.onclick = () => { selections.delete(selKey(sel.role,sel.sen)); renderRows(); renderSelbar(); if(!selections.size) go(1); };
     row.appendChild(del);
+
     wrap.appendChild(row);
   }
+  updateLive();
 }
 
 /* ============================================================
-   5. STEP 3 — RESULTS
+   6. STEP 3 — RESULTS
    ============================================================ */
 function renderResults(){
   const body = document.getElementById("resBody");
   const foot = document.getElementById("resFoot");
   body.innerHTML = "";
-  let tF=0, tS=0, tA=0;
   for (const sel of selections.values()){
     const daily = RATE[sel.role][sel.sen];
     const days = DAYS_PER_MONTH * sel.months * sel.qty;
-    const free = daily * days;
-    const staff = free * (1+STAFF_MARKUP);
-    const agency = free * (1+AGENCY_MARKUP);
-    tF+=free; tS+=staff; tA+=agency;
+    const base = daily * days;
+    const staff = base * (1+STAFF_MARKUP);
+    const agency = base * (1+agencyMarkup);
     const qtyTxt = sel.qty>1 ? `${sel.qty}× ` : "";
     const tr = document.createElement("tr");
     tr.innerHTML =
       `<td><div class="pname">${qtyTxt}${sel.sen} ${sel.role}</div><div class="pmeta">${sel.months} months · ${euro(daily)}/day</div></td>`+
-      `<td><span class="amt">${euro(free)}</span><span class="perday">${euro(daily)}/day</span></td>`+
-      `<td><span class="amt staff">${euro(staff)}</span><span class="perday">${euro(daily*(1+STAFF_MARKUP))}/day</span></td>`+
-      `<td><span class="amt agency">${euro(agency)}</span><span class="perday">${euro(daily*(1+AGENCY_MARKUP))}/day</span></td>`;
+      `<td data-label="Staff-IT"><span class="amt staff">${euro(staff)}</span><span class="perday">${euro(daily*(1+STAFF_MARKUP))}/day</span></td>`+
+      `<td data-label="Other Agency"><span class="amt agency">${euro(agency)}</span><span class="perday">${euro(daily*(1+agencyMarkup))}/day</span></td>`;
     body.appendChild(tr);
   }
+
+  const t = computeTotals();
   foot.innerHTML =
     `<tr><td>Total</td>`+
-    `<td><span class="amt">${euro(tF)}</span></td>`+
-    `<td><span class="amt staff">${euro(tS)}</span></td>`+
-    `<td><span class="amt agency">${euro(tA)}</span></td></tr>`;
+    `<td data-label="Staff-IT total"><span class="amt staff">${euro(t.tStaff)}</span></td>`+
+    `<td data-label="Agency total"><span class="amt agency">${euro(t.tAgency)}</span></td></tr>`;
 
-  const savings = tA - tS;
-  document.getElementById("saveBig").textContent = euro(savings);
+  // bar chart
+  const maxV = Math.max(t.tStaff, t.tAgency) || 1;
+  const barStaff = document.getElementById("barStaff");
+  const barAgency = document.getElementById("barAgency");
+  barStaff.style.width = Math.max(8, (t.tStaff/maxV)*100) + "%";
+  barAgency.style.width = Math.max(8, (t.tAgency/maxV)*100) + "%";
+  barStaff.textContent = euro(t.tStaff);
+  barAgency.textContent = euro(t.tAgency);
+
+  // hero
+  const pct = t.tAgency ? Math.round((t.savings / t.tAgency) * 100) : 0;
+  document.getElementById("saveBig").textContent = euro(t.savings);
   document.getElementById("saveNote").textContent =
-    `compared to a traditional agency, over your selected duration (excl. VAT)`;
-  document.getElementById("quoteCta").href = buildMailto();
+    `That's ${pct}% less than a traditional agency at ${Math.round(agencyMarkup*100)}% margin, over your selected duration (excl. VAT).`;
+  const mailto = buildMailto();
+  document.getElementById("quoteCta").href = mailto;
+  document.getElementById("quoteBtn2").href = mailto;
+
+  renderEquivalents(t);
+
+  document.getElementById("footnote").innerHTML =
+    `All amounts are excl. VAT and based on ${DAYS_PER_MONTH} working days per month. `+
+    `Daily rates are indicative market medians derived from real freelance assignment data per domain and seniority; `+
+    `they are a benchmark, not a quote. The "What could you do with that?" examples are illustrative.`;
+}
+
+function renderEquivalents(t){
+  const s = t.savings;
+  const head = Math.max(1, t.head);
+  // illustrative unit costs (€, excl. VAT)
+  const blendedStaffDay = t.days ? t.tStaff / t.days : 800;
+  const items = [
+    {emoji:"🧑‍💻", n: Math.floor(s / blendedStaffDay), lbl: "extra Staff-IT consultant-days on top of your team"},
+    {emoji:"🎓", n: Math.floor(s / 600), lbl: "professional training days for upskilling (≈ €600/day)"},
+    {emoji:"🏝️", n: Math.floor(s / (1500 * head)), lbl: `team offsites for your ${head}-person team (≈ €1 500 p.p.)`},
+    {emoji:"🍽️", n: Math.floor(s / (90 * head)), lbl: `team dinners to celebrate milestones (≈ €90 p.p.)`},
+  ];
+  const grid = document.getElementById("equivGrid");
+  grid.innerHTML = "";
+  for (const it of items){
+    if (it.n < 1) continue;
+    const c = document.createElement("div");
+    c.className = "eq-card";
+    c.innerHTML = `<div class="emoji">${it.emoji}</div><div class="num">${it.n.toLocaleString("en-US").replace(/,/g," ")}</div><div class="lbl">${it.lbl}</div>`;
+    grid.appendChild(c);
+  }
 }
 
 function buildMailto(){
@@ -552,18 +832,34 @@ function buildMailto(){
     const q = sel.qty>1 ? `${sel.qty}× ` : "";
     return `- ${q}${sel.sen} ${sel.role} — ${sel.months} months`;
   }).join("\n");
+  const t = computeTotals();
   const subject = "Make my personalized offer";
   const body =
     "Dear,\n\n" +
     "I am interested in the following profiles:\n\n" +
     lines + "\n\n" +
+    `Estimated saving vs. a traditional agency: ${euro(t.savings)} over the selected duration.\n\n` +
     "Let's talk this through.\n\n" +
     "Kind regards,";
   return "mailto:info@staffit.be?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
 }
 
+/* margin slider */
+const marginSlider = document.getElementById("agencyMargin");
+marginSlider.oninput = () => {
+  agencyMarkup = parseInt(marginSlider.value,10) / 100;
+  const pct = marginSlider.value + "%";
+  document.getElementById("agencyMarginVal").textContent = pct;
+  document.getElementById("agencyPctHead").textContent = pct + " margin";
+  document.getElementById("barAgencyLab").textContent = pct + " margin";
+  renderResults();
+};
+
+document.getElementById("printBtn").onclick = () => window.print();
+document.getElementById("quoteBtn2").onclick = (e) => { e.preventDefault(); window.location.href = buildMailto(); };
+
 /* ============================================================
-   6. NAVIGATION
+   7. NAVIGATION
    ============================================================ */
 function go(step){
   for (const n of [1,2,3]){
@@ -572,12 +868,15 @@ function go(step){
     ind.classList.toggle("active", n===step);
     ind.classList.toggle("done", n<step);
   }
+  document.getElementById("con1").classList.toggle("done", step>1);
+  document.getElementById("con2").classList.toggle("done", step>2);
   window.scrollTo({top:0, behavior:"smooth"});
 }
 document.getElementById("toStep2").onclick = () => { renderRows(); go(2); };
-document.getElementById("backTo1").onclick = () => go(1);
+document.getElementById("backTo1").onclick = () => { renderSelbar(); go(1); };
 document.getElementById("toStep3").onclick = () => { renderResults(); go(3); };
 document.getElementById("backTo2").onclick = () => { renderRows(); go(2); };
+roleSearch.oninput = () => renderRoles();
 
 /* init */
 renderDomains();
