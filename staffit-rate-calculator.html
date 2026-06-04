@@ -130,34 +130,37 @@
   .role-search:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 
   /* ---------- Role rows ---------- */
-  .role-rows { display: flex; flex-direction: column; gap: 8px; }
+  .role-rows { display: flex; flex-direction: column; gap: 5px; }
   .rrow {
-    display: grid; grid-template-columns: 1fr auto auto auto; gap: 16px; align-items: center;
-    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 14px; background: #fff;
+    display: grid; grid-template-columns: 1fr auto auto auto; gap: 14px; align-items: center;
+    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 8px 6px 13px; background: #fff;
     transition: border-color .15s ease, box-shadow .15s ease;
   }
-  .rrow:hover { border-color: var(--brand); }
-  .rrow.in-team { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
-  .rrow .rinfo .rn { font-weight: 600; font-size: 13px; }
-  .rrow .rinfo .rd { font-size: 11.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; margin-top: 2px; }
+  .rrow:hover { border-color: #d6d8e4; }
+  .rrow.in-team { border-color: var(--brand-soft); box-shadow: inset 2px 0 0 var(--brand); }
+  .rinfo { display: flex; align-items: baseline; gap: 9px; min-width: 0; }
+  .rinfo .rn { font-weight: 600; font-size: 12.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rinfo .rprice { font-size: 11.5px; font-weight: 500; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .rinfo .rprice .per { opacity: .55; margin-left: 1px; }
+  .rinfo .tip { align-self: center; }
+  .rinfo .tip .ico { width: 13px; height: 13px; font-size: 9px; opacity: .45; }
   .rseg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
-  .rseg button { border: none; background: #fff; padding: 6px 13px; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; color: var(--ink); transition: all .12s; }
+  .rseg button { border: none; background: #fff; padding: 4px 11px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; color: var(--muted); transition: all .12s; }
   .rseg button + button { border-left: 1px solid var(--line); }
   .rseg button:hover { color: var(--brand); }
-  .rseg button.on { background: var(--brand); color: #fff; }
-  .rseg button.on:hover { color: #fff; }
+  .rseg button.on { background: var(--brand-soft); color: var(--brand); }
   .rqty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
-  .rqty button { width: 30px; height: 30px; border: none; background: #fff; font-size: 16px; cursor: pointer; color: var(--brand); font-family: inherit; }
+  .rqty button { width: 26px; height: 26px; border: none; background: #fff; font-size: 15px; line-height: 1; cursor: pointer; color: var(--brand); font-family: inherit; }
   .rqty button:disabled { color: var(--line); cursor: not-allowed; }
-  .rqty .rv { width: 32px; text-align: center; font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .rqty .rv { width: 26px; text-align: center; font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; }
   .add-btn {
-    border: 1px solid var(--brand); background: var(--brand); color: #fff; font-family: inherit;
-    font-weight: 700; font-size: 12.5px; padding: 8px 16px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: #fff; color: var(--brand); font-family: inherit;
+    font-weight: 600; font-size: 11.5px; padding: 5px 13px; border-radius: 999px; cursor: pointer;
     white-space: nowrap; transition: all .15s ease;
   }
-  .add-btn:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
-  .add-btn:disabled { background: var(--line); border-color: var(--line); color: #fff; cursor: not-allowed; }
-  .add-btn.added { background: var(--save); border-color: var(--save); }
+  .add-btn:hover { border-color: var(--brand); background: var(--brand-soft); }
+  .add-btn:disabled { color: var(--line); border-color: var(--line); background: #fff; cursor: not-allowed; }
+  .add-btn.added { background: var(--save); border-color: var(--save); color: #fff; }
 
   .empty { color: var(--muted); font-size: 13px; padding: 18px 0; }
   .role-hint { color: var(--muted); font-size: 13px; margin: 16px 0 0; }
@@ -642,9 +645,9 @@ function renderRoles(){
     const info = document.createElement("div");
     info.className = "rinfo";
     info.innerHTML =
-      `<div class="rn">${r.n}</div>`+
-      `<div class="rd"><span class="rrate">${euro(RATE[r.n][ui.sen])}</span> / day `+
-      `<span class="tip"><span class="ico" tabindex="0">i</span><span class="bubble">${rateTip(r, ui.sen)}</span></span></div>`;
+      `<span class="rn">${r.n}</span>`+
+      `<span class="rprice">${euro(RATE[r.n][ui.sen])}<span class="per">/day</span></span>`+
+      `<span class="tip"><span class="ico" tabindex="0">i</span><span class="bubble">${rateTip(r, ui.sen)}</span></span>`;
     row.appendChild(info);
 
     // seniority toggle (default Medior)
