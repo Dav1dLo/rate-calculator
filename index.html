@@ -851,7 +851,7 @@ function renderResults(){
   barAgency.textContent = euro(t.tAgency);
 
   // hero
-  const pct = t.tAgency ? Math.round((t.savings / t.tAgency) * 100) : 0;
+  const pct = Math.round((agencyMarkup - STAFF_MARKUP) * 100);
   document.getElementById("saveBig").textContent = euro(t.savings);
   document.getElementById("saveNote").textContent =
     `That's ${pct}% less than a traditional agency at ${Math.round(agencyMarkup*100)}% margin, over your selected duration (excl. VAT).`;
